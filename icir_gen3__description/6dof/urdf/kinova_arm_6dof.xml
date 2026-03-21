@@ -1,5 +1,5 @@
 <mujoco model="kinova_field">
-	<option noslip_iterations="70" />
+	<option noslip_iterations="10" />
 	<size njmax="8000" nconmax="4000"/>
 	<option timestep="0.001"/>
 	
@@ -9,6 +9,8 @@
 		<material name="floor_material" texture="floor_tex" texuniform="true" />
 		<texture name="wood_tex" type="2d" builtin="checker" rgb1="0.6 0.4 0.2" rgb2="0.5 0.3 0.15" width="10" height="10" />
 		<material name="wood_material" texture="wood_tex" texuniform="true" />
+		<material name="mug_mat" rgba="0.2 0.6 0.9 1" specular="0.5" shininess="0.5"/>
+		<mesh name="mug_mesh" file="mug.stl" scale=".01 .01 .01"/>
 	</asset>
 	<visual>
         <map force = 0.1/>
@@ -21,7 +23,11 @@
         <default class="cls">
             <geom group="2" rgba="0.79216 0.81961 0.93333 0.5"/>
         </default>
-    </default>		
+        <default class="mug_wall">
+            <geom type="box" size="0.0026 0.00704 0.033" group="2"
+                  friction="2.0 0.5 0.01" solimp="0.95 0.99 0.01" solref="0.01 1" condim="4"/>
+        </default>
+    </default>	
 
 	<worldbody>
 		<geom name="ground" type="plane" size="5 5 1" pos="0 0 -0.4"  material="floor_material" condim="6"/>
@@ -45,7 +51,7 @@
 			<geom name="table_target_geom" type="box" size="0.2 0.2 0.2" material="wood_material" friction="1 0.5 0.01" />
 		</body>
 
-		<body name="target_box" pos="0.4 0.0 0.025">
+		<body name="target_box" pos="0.4 0.05 0.025">
 			<joint name="target_box_x" type="slide" axis="1 0 0" pos="0 0 0"/>
 			<joint name="target_box_y" type="slide" axis="0 1 0" pos="0 0 0"/>
 			<joint name="target_box_z" type="slide" axis="0 0 1" pos="0 0 0"/>
@@ -54,8 +60,33 @@
 			<joint name="target_box_rz" type="hinge" axis="0 0 1" pos="0 0 0"/>
 			<geom name="target_box_geom" type="box" size="0.025 0.025 0.025" rgba="1 0 0 1" mass="0.1" friction="2.0 0.5 0.01" solimp="0.95 0.99 0.01" solref="0.01 1" condim="6"/>
 		</body>
+
+		<!-- Mug for pick and place (on source table) -->
+		<!-- NOTE: included file sets compiler angle="radian", so use quat (not euler) to avoid ambiguity -->
+		<body name="mug" pos="0.4 -0.05 0.0">
+			<joint name="mug_x" type="slide" axis="1 0 0" pos="0 0 0"/>
+			<joint name="mug_y" type="slide" axis="0 1 0" pos="0 0 0"/>
+			<joint name="mug_z" type="slide" axis="0 0 1" pos="0 0 0"/>
+			<joint name="mug_rx" type="hinge" axis="1 0 0" pos="0 0 0" damping="0.5"/>
+			<joint name="mug_ry" type="hinge" axis="0 1 0" pos="0 0 0" damping="0.5"/>
+			<joint name="mug_rz" type="hinge" axis="0 0 1" pos="0 0 0"/>
+			<!-- Visual mesh: Rx(90°) via quat=(cos45°,sin45°,0,0) → Y-up STL becomes Z-up in MuJoCo -->
+			<geom type="mesh" mesh="mug_mesh" material="mug_mat" quat="0.70711 0.70711 0 0" group="1" contype="0" conaffinity="0" density="0"/>
+			<!-- Square base: 4-corner contact → tipping-resistant -->
+			<geom type="box" size="0.04 0.04 0.01" pos="0 0 0.01"
+			      mass="0.3" friction="2.0 0.5 0.01" solimp="0.95 0.99 0.01" solref="0.01 1" condim="6" group="2"/>
+			<!-- Cup wall ring (8 boxes at 45° intervals via quat): hollow for top-down grasp, sides for side grasp -->
+			<geom class="mug_wall" pos="0.0418 0 0.038"        quat="1 0 0 0"/>
+			<geom class="mug_wall" pos="0.0296 0.0296 0.038"   quat="0.92388 0 0 0.38268"/>
+			<geom class="mug_wall" pos="0 0.0418 0.038"        quat="0.70711 0 0 0.70711"/>
+			<geom class="mug_wall" pos="-0.0296 0.0296 0.038"  quat="0.38268 0 0 0.92388"/>
+			<geom class="mug_wall" pos="-0.0418 0 0.038"       quat="0 0 0 1"/>
+			<geom class="mug_wall" pos="-0.0296 -0.0296 0.038" quat="0.38268 0 0 -0.92388"/>
+			<geom class="mug_wall" pos="0 -0.0418 0.038"       quat="0.70711 0 0 -0.70711"/>
+			<geom class="mug_wall" pos="0.0296 -0.0296 0.038"  quat="0.92388 0 0 -0.38268"/>
+		</body>
 	</worldbody>
-    <keyframe>  
-		<key name="front" time="0" qpos ="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+    <keyframe>
+		<key name="front" time="0" qpos ="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
     </keyframe>
 </mujoco>
