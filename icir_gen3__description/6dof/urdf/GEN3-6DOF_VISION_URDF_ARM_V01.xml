@@ -41,6 +41,8 @@
                                 <inertial pos="0.000281 0.011402 -0.029798" quat="0.394358 0.596779 -0.577293 0.393789" mass="0.5" diaginertia="0.000657336 0.000587019 0.000320645" />
                                 <joint name="Actuator6" pos="0 0 0" axis="0 0 1" damping="3" frictionloss="5.5"/>
                                 <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="bracelet_with_vision_link" />
+                                <!-- Wrist-eye camera: mounted on side of bracelet, looking toward gripper/objects -->
+                                <camera name="wrist_cam" pos="0 0.08 -0.04" xyaxes="1 0 0 0 1 0" fovy="90"/>
                                 
                                 <geom pos="0 0 -0.061525" quat="0 0.706825 0.707388 0" type="mesh" rgba="0.1 0.1 0.1 1" mesh="robotiq_arg2f_base_link" />
                                 <body name="left_outer_knuckle" pos="-0.0306011 -2.43685e-05 -0.116429" quat="0 0.707388 -0.706825 0">

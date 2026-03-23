@@ -14,7 +14,8 @@
 	</asset>
 	<visual>
         <map force = 0.1/>
-    </visual>	
+        <global offwidth="640" offheight="480"/>
+    </visual>
     
 	<default>
         <default class ="viz">
